@@ -32,12 +32,17 @@ const planMesh = new THREE.Mesh( planeGeometry, planMaterial );
 
 const {array} = planMesh.geometry.attributes.position
 for (let i = 0; i<array.length; i += 3 ){
-    const x = array[i]
-    const y = array[i + 1]
+    // const x = array[i]
+    // const y = array[i + 1]
     const z = array[i + 2]
 
     array[i + 2] = z + Math.random()
+    // array[i] = x + (Math.random() )
+    // array[i + 1] = y + (Math.random())
+    // array[i + 2] = y + (Math.random())
 }
+
+planMesh.geometry.attributes.position.originalPosition = planMesh.geometry.attributes.position.array
 
 const light = new THREE.DirectionalLight( 0xffffff, 1 );
 light.position.set(0, 0, 1)
@@ -63,10 +68,21 @@ colors.push(0.7, 0.6 ,1)
 }
 planMesh.geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3))
 
+let frame = 0
 function animate(){
+
     requestAnimationFrame(animate)
     renderer.render(scene, camera)
     raycaster.setFromCamera(mouse, camera)
+    frame += 0.01
+
+    const { array, originalPosition } = planMesh.geometry.attributes.position
+    for (let i = 0; i < array.length ; i += 3){
+        array[i] = originalPosition[i] + Math.cos(frame) * 0.005
+
+        planMesh.geometry.attributes.position.needsUpdate = true
+    }
+
     const intersects = raycaster.intersectObject(planMesh)
     if (intersects.length > 0) {
 
@@ -80,13 +96,16 @@ function animate(){
             g: 0.6,
             b: 1
         }
-
+        // const hoverColor = {
+        //     r: 0,
+        //     g: 1,
+        //     b: 0.5
+        // }
         const hoverColor = {
-            r: 0,
+            r: 0.1,
             g: 1,
-            b: 0.5
+            b: 0.8
         }
-
         gsap.to(hoverColor, {
             r: initialColor.r,
             g: initialColor.g,
